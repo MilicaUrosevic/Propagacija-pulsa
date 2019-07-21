@@ -1,0 +1,73 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jul 22 00:09:01 2019
+
+@author: milicaurosevic
+"""
+
+import numpy as np
+from scipy.integrate import odeint
+import matplotlib.pyplot as plt
+from cmath import *
+I=complex(0,1)
+o=1
+d=0
+# function that returns dz/dt
+def model(z,t):
+    ro00 = z[0]
+    ro01 = z[1]
+    roq0 = z[2]
+    ro11 = z[3]    
+    dro00dt = ro11 - I*(o*ro01/2 - o*ro10/2)
+    dro01dt = -ro01 - I*(-d*ro01 + o*ro00/2 - o*ro11/2)
+    dro10dt = -ro10 - I*(d*ro10 - o*ro00/2 + o*ro11/2)
+    dro11dt = -ro11 - I*(-o*ro01/2 + o*ro10/2)
+    dzdt = [dro00dt,dro01dt,dro10dt,dro11dt]
+    return dzdt
+
+# initial condition
+z0 = [1,0,0,0]
+
+# number of time points
+n = 401
+
+# time points
+t = np.linspace(0,40,n)
+
+
+
+# store solution
+ro00 = np.empty_like(t)
+ro01 = np.empty_like(t)
+ro10 = np.empty_like(t)
+ro11 = np.empty_like(t)
+# record initial conditions
+ro00[0] = z0[0]
+ro01[0] = z0[1]
+ro10[0] = z0[2]
+ro11[0] = z0[3]
+
+# solve ODE
+for i in range(1,n):
+    # span for next time step
+    tspan = [t[i-1],t[i]]
+    # solve for next step
+    z = odeint(model,z0,tspan)
+    # store solution for plotting
+    ro00[i] = z[1][0]
+    ro01[i] = z[1][1]
+    ro10[i] = z[1][2]
+    ro11[i] = z[1][3]
+    # next initial condition
+    z0 = z[1] 
+
+# plot results
+plt.plot(t,ro00,'g:',label='ro00')
+plt.plot(t,ro01,'b-',label='ro01')
+plt.plot(t,ro10,'r--',label='ro10')
+plt.plot(t,ro11,'m-',label='ro11')
+plt.ylabel('values')
+plt.xlabel('time')
+plt.legend(loc='best')
+plt.show()
